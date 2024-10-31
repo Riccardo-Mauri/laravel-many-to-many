@@ -17,6 +17,17 @@
         <p>Tipologia: Nessuna</p>
     @endif
 
+    <h3>Tecnologie utilizzate:</h3>
+    @if ($project->technologies->isNotEmpty())
+        <ul>
+            @foreach ($project->technologies as $technology)
+                <li>{{ $technology->name }}</li>
+            @endforeach
+        </ul>
+    @else
+        <p>Nessuna tecnologia associata.</p>
+    @endif
+
     <a href="{{ route('admin.projects.edit', $project->id) }}" class="btn btn-warning">Modifica Progetto</a>
     <form action="{{ route('admin.projects.destroy', $project->id) }}" method="POST">
         @csrf

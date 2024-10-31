@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Type;
 use App\Models\Project;
+use App\Models\Technology;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
@@ -24,7 +25,8 @@ class ProjectController extends Controller
     public function create()
     {
         $types = Type::all(); // Recupera tutte le tipologie
-        return view('admin.projects.create', compact('types'));
+        $technologies = Technology::all();  //recupera tutte le tecnologie
+        return view('admin.projects.create', compact('types','technologies'));
 
     }
 
@@ -41,15 +43,19 @@ class ProjectController extends Controller
             'image' => 'nullable|url', // Se l'immagine è un URL
             'is_started' => 'boolean',
             'type_id' => 'nullable|exists:types,id',
+            'technologies' => 'array|exists:technologies,id', 
         ]);
     
-        Project::create([
+            $project = Project::create([
             'title' => $request->title,
             'description' => $request->description,
             'image' => $request->image,
             'is_started' => $request->is_started ?? false,
             'type_id' => $request->type_id, 
         ]);
+
+         // Associazione delle tecnologie selezionate
+         $project->technologies()->sync($request->technologies ?? []);
     
         return redirect()->route('admin.projects.index');
     }
@@ -76,8 +82,10 @@ class ProjectController extends Controller
          $project = Project::findOrFail($id);
          // Recupera tutte le tipologie
          $types = Type::all(); 
+         // Recupera tutte le tecnologie
+         $technologies = Technology::all();
+        return view('admin.projects.edit', compact('project','types', 'technologies'));
 
-        return view('admin.projects.edit', compact('project', 'types'));
     }
 
     /**
@@ -91,6 +99,7 @@ class ProjectController extends Controller
             'image' => 'nullable|url',
             'is_started' => 'boolean',
             'type_id' => 'nullable|exists:types,id',
+            'technologies' => 'array|exists:technologies,id',
         ]);
 
         // Recupera il progetto in base all'ID
@@ -104,6 +113,9 @@ class ProjectController extends Controller
         'is_started' => $request->is_started ?? false, // Default a false se non fornito nel campo
         'type_id' => $request->type_id,
         ]);
+         // Associazione delle tecnologie selezionate
+        $project->technologies()->sync($request->technologies ?? []);
+
         return redirect()->route('admin.projects.index');
     }
 

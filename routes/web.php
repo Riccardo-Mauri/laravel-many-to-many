@@ -23,6 +23,8 @@ Route::prefix('admin')
         Route::resource('projects', ProjectController::class);
         // Rotte per gestire i tipi
         Route::resource('types', TypeController::class);
+        // Rotte per gestire le tecnologie
+        Route::resource('technologies', TechnologyController::class);
     });
 
 // Rotte per l'autenticazione

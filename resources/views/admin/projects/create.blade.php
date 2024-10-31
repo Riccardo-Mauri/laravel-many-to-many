@@ -45,6 +45,17 @@
             </select>
         </div>
         
+        <div class="form-group">
+            <label for="technologies">Seleziona Tecnologie</label><br>
+                @foreach ($technologies as $technology)
+                    <label>
+                        <input type="checkbox" name="technologies[]" value="{{ $technology->id }}"
+                            {{ in_array($technology->id, old('technologies', [])) ? 'checked' : '' }}>
+                            {{ $technology->name }}
+                    </label><br>
+                @endforeach
+    </div>
+
         <button type="submit" class="btn btn-primary">Salva Progetto</button>
     </form>
 @endsection
