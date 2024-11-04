@@ -3,7 +3,7 @@
 @section('main-content')
     <h1>Modifica Progetto</h1>
 
-    <form action="{{ route('admin.projects.update', $project->id) }}" method="POST">
+    <form action="{{ route('admin.projects.update', $project->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -24,11 +24,22 @@
         </div>
 
         <div class="mb-3">
-            <label for="image" class="form-label">URL Immagine</label>
-            <input type="text" name="image" id="image" class="form-control" value="{{ old('image', $project->image) }}">
+            <label for="image" class="form-label">Immagine</label>
+            <input type="file" name="image" id="image" class="form-control">
             @error('image')
                 <div class="text-danger">{{ $message }}</div>
             @enderror
+
+            @if ($project->image)
+                <div class="mt-3">
+                    <h4>Immagine attuale:</h4>
+                    <img src="{{asset('storage/'. $project->image)}}" alt="{{ $project->title}}" style="height: 150px;">
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" id="remove_image" name="remove_image">
+                    <label for="remove_image">Rimuovi immagine attuale</label>
+                </div>
+            @endif
         </div>
 
         <div class="form-check mb-3">

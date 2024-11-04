@@ -8,6 +8,9 @@ use App\Models\Project;
 use App\Models\Technology;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Storage;
+
+
 class ProjectController extends Controller
 {
     /**
@@ -39,17 +42,21 @@ class ProjectController extends Controller
         // Validazione dei dati in ingresso
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'image' => 'nullable|url', // Se l'immagine è un URL
+            'description' => 'required|string',
+            'image' => 'nullable|image|max:20480',
             'is_started' => 'boolean',
             'type_id' => 'nullable|exists:types,id',
-            'technologies' => 'array|exists:technologies,id', 
+            'technologies' => 'array|exists:technologies,id',
+            'remove_image' => 'nullable',
         ]);
-    
-            $project = Project::create([
+
+        $imagePath =$request->file('image') ? Storage::put('uploads',$request->file('image')): null;
+       
+
+        $project = Project::create([
             'title' => $request->title,
             'description' => $request->description,
-            'image' => $request->image,
+            'image' => $imagePath,
             'is_started' => $request->is_started ?? false,
             'type_id' => $request->type_id, 
         ]);
@@ -92,32 +99,50 @@ class ProjectController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'image' => 'nullable|url',
-            'is_started' => 'boolean',
-            'type_id' => 'nullable|exists:types,id',
-            'technologies' => 'array|exists:technologies,id',
-        ]);
+{
+    // Validazione dei dati in ingresso
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'image' => 'nullable|image|max:20480',
+        'is_started' => 'boolean',
+        'type_id' => 'nullable|exists:types,id',
+        'technologies' => 'array|exists:technologies,id',
+        'remove_image' => 'nullable',
+    ]);
 
-        // Recupera il progetto in base all'ID
-        $project = Project::findOrFail($id);
+    // Recupera il progetto in base all'ID
+    $project = Project::findOrFail($id);
     
-        // Aggiorna il progetto
-        $project->update([
+    // Gestione dell'immagine
+    if ($request->hasFile('image')) {
+        // Elimina l'immagine precedente se esiste
+        if ($project->image) {
+            Storage::delete($project->image);
+        }
+        // Salva la nuova immagine
+        $imagePath = Storage::put('uploads', $request->file('image'));
+        $project->image = $imagePath;
+    } elseif ($request->remove_image && $project->image) {
+        // Se l'utente ha richiesto di rimuovere l'immagine
+        Storage::delete($project->image);
+        $project->image = null;
+    }
+
+    // Aggiorna il progetto
+    $project->update([
         'title' => $request->title,
         'description' => $request->description,
-        'image' => $request->image,
-        'is_started' => $request->is_started ?? false, // Default a false se non fornito nel campo
+        'image' => $project->image,
+        'is_started' => $request->is_started ?? false, // Default a false se non fornito
         'type_id' => $request->type_id,
-        ]);
-         // Associazione delle tecnologie selezionate
-        $project->technologies()->sync($request->technologies ?? []);
+    ]);
 
-        return redirect()->route('admin.projects.index');
-    }
+    // Associazione delle tecnologie selezionate
+    $project->technologies()->sync($request->technologies ?? []);
+
+    return redirect()->route('admin.projects.index');
+}
 
     /**
      * Remove the specified resource from storage.
@@ -126,6 +151,10 @@ class ProjectController extends Controller
     {
         // Recupera il progetto in base all'ID
         $project = Project::findOrFail($id);
+
+        if($project->image){
+            Storage::delete($project->image);
+        }
     
         // Cancella il progetto
         $project->delete();

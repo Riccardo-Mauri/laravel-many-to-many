@@ -3,7 +3,7 @@
 @section('main-content')
     <h1>Crea Nuovo Progetto</h1>
 
-    <form action="{{ route('admin.projects.store') }}" method="POST">
+    <form action="{{ route('admin.projects.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         <div class="form-group">
@@ -23,8 +23,8 @@
         </div>
 
         <div class="form-group">
-            <label for="image">URL Immagine</label>
-            <input type="text" name="image" id="image" class="form-control" value="{{ old('image') }}">
+            <label for="image">Immagine</label>
+            <input type="file" name="image" id="image" class="form-control">
             @error('image')
                 <div class="text-danger">{{ $message }}</div>
             @enderror
