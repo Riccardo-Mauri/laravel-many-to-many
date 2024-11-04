@@ -42,7 +42,7 @@ class ProjectController extends Controller
         // Validazione dei dati in ingresso
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'required|string', //cambito in required perché se lascaito vuot dava errore
             'image' => 'nullable|image|max:20480',
             'is_started' => 'boolean',
             'type_id' => 'nullable|exists:types,id',
@@ -103,7 +103,7 @@ class ProjectController extends Controller
     // Validazione dei dati in ingresso
     $request->validate([
         'title' => 'required|string|max:255',
-        'description' => 'nullable|string',
+        'description' => 'required|string', //cambiato in required perché se dato vuoto dava errore 
         'image' => 'nullable|image|max:20480',
         'is_started' => 'boolean',
         'type_id' => 'nullable|exists:types,id',
